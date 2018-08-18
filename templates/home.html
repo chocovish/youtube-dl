@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>YouTube Downloader</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-brand">
+                <div class="navbar-item"><p class="title tag is-size-4 is-dark">YTDL.online</p></div>
+            </div>
+            <div class="navbar-end">
+                <!--<div class="navbar-item"><p class="tag is-size-6 is-rounded is-primary">How TO Use</p></div>-->
+            </div>
+        </div>
+    </nav>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+
+
+<div id="app">
+
+
+    <section class="section">
+        <div class="container">
+            <div class="field has-addons">
+                <div class="control is-expanded">
+                    <input v-model="url" type="text" class="input is-primary is-large" placeholder="Paste YouTube video url" name="url">
+                </div>
+                <div class="control">
+                    <button class="button is-info is-large is-rounded" @click="loaddata"><b>Generate</b></button>
+                </div>
+            </div>
+            
+        </div>
+    </section>
+
+
+<center v-if="loading"> <p class="heading">[[waittext]]</p> </center>
+
+
+    <section class="section" v-if="show">
+        <div class="container">
+            <div class="columns box">
+                <div class="column is-3">
+                    <figure class="image is-16by9"><img :src="data.thumbnail_url" class="box"></figure>
+                </div>
+                <div class="column">
+                    <p class="title is-size-5">[[data.title]]</p>
+                    <p class="title is-size-7">[[data.description]] ...</p>
+                    <p class="tag is-medium">[[data.length]]</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div v-for="v in data.streams" class="level is-mobile box">
+                <div class="level-left">
+                    <p class="tag is-info is-medium" style="margin-right: 3px">[[v.mime_type]] [[v.resolution]]</p>
+                    <p v-if="v.video_only" class="tag is-warning is-medium" style="margin-right: 3px">No Audio</p>
+                    <p class="tag is-danger is-medium">[[v.size]]MB</p>
+                </div>
+                <div class="level-right">
+                    <a :href="v.url" class="button is-primary"><strong>Download</strong></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+</div>
+
+
+
+<script>
+    var app = new Vue({
+        delimiters: ['[[',']]'],
+        el: '#app',
+        data: {
+            title: "Attack On Titan",
+            show: false,
+            loading: false,
+            data: {},
+            url: "",
+            waittext: "",
+        },
+        methods: {
+            toggleview: function(){this.show = !this.show},
+            loaddata: function(){
+                this.waittext = "Loading your Video, it may take upto 10 seconds!"
+                this.loading = true;
+                fetch('/api/info/?url='+this.url).then(response => response.json()).then(data => {
+                    if(data.error){
+                        this.waittext = data.error;
+                    }
+                    else {
+                    this.data = data;
+                    this.show = true;
+                    this.loading = false;
+                    }
+                }).catch(e => console.log(e));
+                                },
+        },
+    });
+</script>
+
+
+</body>
+</html>
